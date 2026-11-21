@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Bullet Heaven — v0.5 Build</title>
+<title>Bullet Heaven</title>
+<meta name="description" content="Bullet Heaven: an endless-wave survivors-like set in a cursed graveyard. Free to play in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--bone:#e8e2d0;--blue:#5aa9ff;--purple:#b07cff;--gold:#ffc94a;--bg:#0d1017;--panel:#151b26;--muted:#8a93a6}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace;color:var(--bone)}
+html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:'Space Mono',ui-monospace,Menlo,Consolas,monospace;color:var(--bone)}
 #wrap{position:fixed;inset:0;overflow:hidden}
 canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);image-rendering:pixelated;image-rendering:crisp-edges}
 #hud{position:absolute;inset:0;pointer-events:none}
@@ -23,8 +26,40 @@ canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);image-r
 .hidehud #hud{display:none}
 #overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:#05070bcc;gap:16px;padding:20px;text-align:center}
 #overlay.show{display:flex}
-#overlay h1{font-size:26px;letter-spacing:6px;text-shadow:3px 3px 0 #000}
-#overlay h2{font-size:18px;letter-spacing:4px;text-shadow:2px 2px 0 #000}
+#overlay h1{font-family:'Silkscreen',monospace;font-size:26px;letter-spacing:6px;text-shadow:3px 3px 0 #000}
+#overlay h2{font-family:'Silkscreen',monospace;font-size:18px;letter-spacing:4px;text-shadow:2px 2px 0 #000}
+/* title screen */
+.ts{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:calc(20px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));pointer-events:auto}
+.tbar{position:absolute;top:calc(20px + env(safe-area-inset-top));left:24px;right:24px;display:flex;justify-content:space-between;align-items:center}
+.ver{font-size:12px;letter-spacing:2px;color:var(--muted);background:none;border:0;padding:8px 0;cursor:default;font-family:inherit}
+.icons{display:flex;gap:10px}
+.ib{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--panel);border:2px solid #e8e2d033;color:var(--bone);cursor:pointer;position:relative}
+.ib.off{color:var(--muted)} .ib.off::after{content:'';position:absolute;left:9px;right:9px;top:50%;height:2px;background:#e04848;transform:rotate(-45deg)}
+.tmain{margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:28px;width:100%}
+.ttop{display:flex;flex-direction:column;align-items:center;gap:26px}
+.logo{margin:0;font-family:'Silkscreen',monospace!important;font-weight:700;font-size:clamp(44px,7vw,80px)!important;letter-spacing:6px!important;line-height:1;text-align:center;text-shadow:5px 5px 0 #000!important}
+.sub{margin:-14px 0 0!important;font-size:13px!important;letter-spacing:6px;color:var(--muted)!important}
+.chips{display:flex;gap:12px}
+.chip{display:flex;align-items:baseline;gap:10px;padding:8px 16px;background:var(--panel);border:2px solid #e8e2d022}
+.chip span{font-size:11px;letter-spacing:2px;color:var(--muted)} .chip b{font-family:'Silkscreen',monospace;font-weight:400;font-size:18px}
+.tact{display:flex;flex-direction:column;align-items:center;gap:14px}
+.primary{width:360px;max-width:100%;height:72px;background:var(--bone);color:#0d1017;border:0;box-shadow:6px 6px 0 #000;font-family:'Silkscreen',monospace;font-weight:700;font-size:26px;letter-spacing:4px;cursor:pointer}
+.primary:hover{background:#fff}
+.sec{display:flex;gap:14px}
+.s2{width:173px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--panel);color:var(--bone);border:2px solid #e8e2d066;box-shadow:4px 4px 0 #000;font-family:'Silkscreen',monospace;font-size:15px;letter-spacing:2px;cursor:pointer}
+.s2:hover{border-color:var(--bone)} .s2 small{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted)} .s2 small.g{color:var(--gold)}
+.hint{display:flex;gap:28px;font-size:12px;color:var(--muted);letter-spacing:1px} .hint b{color:var(--bone);font-weight:400}
+.hint .tch{display:none} .touch .hint .dsk{display:none} .touch .hint .tch{display:inline}
+.ptp{margin-top:12px} .ptp:not(.on){display:none!important}
+.touch.portrait .tmain{margin:0;flex:1;justify-content:space-between;padding-top:70px}
+.touch.portrait .tact{width:100%;flex-direction:column-reverse;margin-bottom:14px}
+.touch.portrait .primary{width:100%;height:76px}
+.touch.portrait .sec{width:100%;display:grid;grid-template-columns:1fr 1fr}
+.touch.portrait .s2{width:auto;height:60px}
+.touch.portrait .logo{font-size:52px!important}
+.mbr{display:none} .touch.portrait .mbr{display:inline}
+.settings{display:flex;flex-direction:column;gap:10px;width:min(360px,90vw)}
+.settings .row{justify-content:space-between;background:var(--panel);border:2px solid #e8e2d022;padding:10px 14px;font-size:12px}
 #overlay p{font-size:12px;color:var(--muted);line-height:1.6;max-width:440px}
 #cards{display:flex;gap:12px;flex-direction:row}
 .touch.portrait #cards{flex-direction:column}
@@ -50,7 +85,7 @@ body:not(.touch) #wrap{cursor:crosshair}
 #bossbar .bn{font-size:11px;letter-spacing:3px;margin-bottom:4px;text-shadow:2px 2px 0 #000;color:var(--gold)}
 #bossbar .bb{height:8px;background:#000;border:1px solid #e8e2d055}
 #bossfill{height:100%;width:100%;background:#c23b3b}
-.btn{font:inherit;font-size:14px;letter-spacing:2px;padding:12px 26px;background:var(--panel);color:var(--bone);border:3px solid var(--bone);cursor:pointer;pointer-events:auto;box-shadow:5px 5px 0 #000}
+.btn{font:inherit;font-family:'Silkscreen',monospace;font-size:14px;letter-spacing:2px;padding:12px 26px;background:var(--panel);color:var(--bone);border:3px solid var(--bone);cursor:pointer;pointer-events:auto;box-shadow:5px 5px 0 #000}
 .btn:hover{filter:brightness(1.25)}
 .btn.sm{font-size:11px;padding:7px 12px;border-width:2px;box-shadow:3px 3px 0 #000;margin:0 3px}
 .pt{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center;font-size:11px;color:var(--muted)}
@@ -369,6 +404,7 @@ addEventListener('keydown',e=>{
   keys[k]=true;
   if(state==='cards' && (k==='1'||k==='2'||k==='3')) pickCard(+k-1);
   if((k==='escape'||k==='p') && (state==='play'||state==='paused')) togglePause();
+  if((k==='`'||k==='~') && state==='title') toggleDev();
   if(k==='enter' && (state==='title'||state==='over') && $('go')) start(1);
 });
 addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
@@ -415,18 +451,58 @@ function tryDash(){
 }
 
 /* ---------- overlays ---------- */
+const ICON={
+  music:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  sound:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>',
+  gear:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>'
+};
+let devTaps=0, devOn=false;
 function showTitle(){
   state='title'; document.body.classList.add('hidehud');
-  ov.innerHTML=`<h1>BULLET HEAVEN</h1><p>v0.5 · endless graveyard</p>
-  <div class="stats">Best: <b>WAVE ${meta.best||'—'}</b> · <span class="g">◆ ${meta.gold}</span> gold</div>
-  <button class="btn" id="go">START RUN</button>
-  <div class="row"><button class="btn sm" id="shop">SHOP</button><button class="btn sm" id="achv">ACHIEVEMENTS ${ACH.filter(a=>meta.ach[a.id]).length}/${ACH.length}</button></div>
-  ${settingsRow()}
-  <p>Desktop: point the cursor to move · click to dash · Esc to pause<br>Touch: drag anywhere to move · tap DASH</p>
-  <div class="pt">Playtest (no gold or achievements): <button class="btn sm" data-w="3">3</button><button class="btn sm" data-w="5">5 · BOSS</button><button class="btn sm" data-w="10">10 · BOSS</button><button class="btn sm" data-w="15">15 · BOSS</button><button class="btn sm" data-w="20">20 · BOSS</button><button class="btn sm" data-w="21">21</button></div>`;
+  const S=meta.settings||(meta.settings={music:true,sfx:true});
+  const ready=SHOP.filter(it=>rank(it.k)<it.max && meta.gold>=shopCost(it,rank(it.k))).length;
+  const achDone=ACH.filter(a=>meta.ach[a.id]).length;
+  ov.innerHTML=`<div class="ts">
+    <div class="tbar"><button class="ver" id="ver" aria-label="Version 0.5">v0.5</button>
+      <div class="icons">
+        <button class="ib ${S.music===false?'off':''}" id="tmus" aria-label="Music ${S.music===false?'off':'on'}">${ICON.music}</button>
+        <button class="ib ${S.sfx===false?'off':''}" id="tsfx" aria-label="Sound ${S.sfx===false?'off':'on'}">${ICON.sound}</button>
+        <button class="ib" id="tset" aria-label="Settings">${ICON.gear}</button>
+      </div></div>
+    <div class="tmain">
+      <div class="ttop">
+        <h1 class="logo">BULLET<br class="mbr"> HEAVEN</h1>
+        <p class="sub">THE ENDLESS GRAVEYARD</p>
+        <div class="chips"><div class="chip"><span>BEST</span><b>WAVE ${meta.best||'—'}</b></div><div class="chip"><span>GOLD</span><b class="g">◆ ${meta.gold}</b></div></div>
+      </div>
+      <div class="tact">
+        <button class="primary" id="go">START RUN</button>
+        <div class="sec">
+          <button class="s2" id="shop"><span>OSSUARY</span><small class="${ready?'g':''}">${ready?`${ready} upgrade${ready===1?'':'s'} ready`:'Permanent upgrades'}</small></button>
+          <button class="s2" id="achv"><span>ACHIEVEMENTS</span><small>${achDone} of ${ACH.length}</small></button>
+        </div>
+      </div>
+    </div>
+    <div class="hint"><span class="dsk"><b>Move</b> point the cursor</span><span class="dsk"><b>Dash</b> click</span><span class="dsk"><b>Pause</b> Esc</span><span class="tch"><b>Drag</b> to move</span><span class="tch"><b>Tap DASH</b> to dash</span></div>
+    <div class="pt ptp ${devOn?'on':''}" id="ptp">Playtest (no gold or achievements): <button class="btn sm" data-w="3">3</button><button class="btn sm" data-w="5">5 · BOSS</button><button class="btn sm" data-w="10">10 · BOSS</button><button class="btn sm" data-w="15">15 · BOSS</button><button class="btn sm" data-w="20">20 · BOSS</button><button class="btn sm" data-w="21">21</button></div>
+  </div>`;
   ov.classList.add('show'); $('go').onclick=()=>start(1);
-  $('shop').onclick=()=>showShop(showTitle); $('achv').onclick=()=>showAch(showTitle); bindSettings(showTitle);
+  $('shop').onclick=()=>showShop(showTitle); $('achv').onclick=()=>showAch(showTitle);
+  $('tmus').onclick=()=>{ S.music=S.music===false; saveMeta(); initAudio(); applyAudioSettings(); showTitle(); };
+  $('tsfx').onclick=()=>{ S.sfx=S.sfx===false; saveMeta(); initAudio(); applyAudioSettings(); showTitle(); };
+  $('tset').onclick=()=>showSettings(showTitle);
+  $('ver').onclick=()=>{ if(++devTaps>=5){ devTaps=0; toggleDev(); } }; // hidden: tap version 5x (or press ~)
   ov.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>start(+b.dataset.w));
+}
+function toggleDev(){ devOn=!devOn; const p=$('ptp'); if(p) p.classList.toggle('on',devOn); }
+function showSettings(back){
+  const S=meta.settings;
+  ov.innerHTML=`<h2>SETTINGS</h2><div class="settings">
+    <div class="row"><span>Music</span><button class="btn sm" id="tmus">${S.music===false?'OFF':'ON'}</button></div>
+    <div class="row"><span>Sound effects</span><button class="btn sm" id="tsfx">${S.sfx===false?'OFF':'ON'}</button></div>
+    <div class="row" style="flex-direction:column;align-items:flex-start;gap:6px;line-height:1.6"><span><b>Desktop</b> · point the cursor to move, click (or Space) to dash, Esc to pause</span><span><b>Touch</b> · drag anywhere to move, tap DASH</span></div>
+  </div><button class="btn" id="sback">BACK</button>`;
+  ov.classList.add('show'); bindSettings(()=>showSettings(back)); $('sback').onclick=back;
 }
 function drawPause(){
   ov.innerHTML=`<h2>PAUSED</h2><button class="btn" id="res">RESUME</button>${settingsRow()}<button class="btn sm" id="quit">ABANDON RUN</button>`;
