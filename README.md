@@ -1,4 +1,4 @@
-# Bullet Heaven
+# Catacomb Raider
 
 An endless-wave survivors-like set in a cursed graveyard. You play the Warden, holding the ossuary while the dead pour in. Your weapons fire on their own; your job is where you stand. Free to play in the browser, desktop and mobile.
 
@@ -14,7 +14,7 @@ Open `index.html` in any modern browser. Everything (code, sprites, music) is in
 ## What's in it
 
 - **Endless waves.** Score is the highest wave you reach. 45-second waves with a short lull between them, and swarm rings and elites mixed in.
-- **Four bosses, every 5 waves:** the Gravekeeper, the Weeping Widow, the Bone Hound Matriarch and the Skeleton King. Past wave 20 the Blood Moon rises and they cycle back, stronger and with new attacks.
+- **Four bosses, every 5 waves:** the Gravekeeper, the Weeping Widow, the Bone Hound Matriarch and the Skeleton King. Past wave 20 the Blood Moon rises: enemy HP, damage and speed climb every wave, and the bosses cycle back stronger with new attacks. Every build eventually falls.
 - **Build your run:** 4 weapons, 8 passives and 4 weapon evolutions, picked from 3 cards on every level-up, elite chest and boss kill. Each boss drops a unique relic.
 - **Meta-progression:** gold carries over between runs into 14 permanent upgrades, and 8 achievements unlock new weapons and passives.
 - **Landscape or portrait:** the view keeps the same play area either way, and the layout switches when a phone rotates.

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Bullet Heaven</title>
-<meta name="description" content="Bullet Heaven: an endless-wave survivors-like set in a cursed graveyard. Free to play in your browser.">
+<title>Catacomb Raider</title>
+<meta name="description" content="Catacomb Raider: an endless-wave survivors-like set in a cursed graveyard. Free to play in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@700;900&family=Silkscreen:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--bone:#e8e2d0;--blue:#5aa9ff;--purple:#b07cff;--gold:#ffc94a;--bg:#0d1017;--panel:#151b26;--muted:#8a93a6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -23,6 +23,10 @@ canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);image-r
 #dashBtn{position:absolute;right:22px;bottom:calc(28px + env(safe-area-inset-bottom));width:78px;height:78px;border-radius:50%;border:2px solid #e8e2d066;background:#ffffff12;color:var(--bone);font:inherit;font-size:12px;letter-spacing:1px;pointer-events:auto;display:none;touch-action:none}
 #dashBtn.cd{opacity:.35}
 .touch #dashBtn{display:block}
+#pauseBtn{position:absolute;left:10px;top:calc(34px + env(safe-area-inset-top));width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#151b26cc;border:2px solid #e8e2d044;color:var(--bone);cursor:pointer;pointer-events:auto;touch-action:none}
+#pauseBtn:hover{border-color:var(--bone)}
+.pmenu{display:flex;flex-direction:column;gap:12px;align-items:stretch;width:min(300px,86vw)}
+.pmenu .btn{width:100%}
 .hidehud #hud{display:none}
 #overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:#05070bcc;gap:16px;padding:20px;text-align:center}
 #overlay.show{display:flex}
@@ -37,7 +41,7 @@ canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);image-r
 .ib.off{color:var(--muted)} .ib.off::after{content:'';position:absolute;left:9px;right:9px;top:50%;height:2px;background:#e04848;transform:rotate(-45deg)}
 .tmain{margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:28px;width:100%}
 .ttop{display:flex;flex-direction:column;align-items:center;gap:26px}
-.logo{margin:0;font-family:'Silkscreen',monospace!important;font-weight:700;font-size:clamp(44px,7vw,80px)!important;letter-spacing:6px!important;line-height:1;text-align:center;text-shadow:5px 5px 0 #000!important}
+.logo{margin:0;font-family:'Grenze Gotisch',serif!important;font-weight:900;font-size:clamp(60px,10vw,120px)!important;letter-spacing:1px!important;line-height:.9;text-align:center;text-shadow:5px 5px 0 #000!important}
 .sub{margin:-14px 0 0!important;font-size:13px!important;letter-spacing:6px;color:var(--muted)!important}
 .chips{display:flex;gap:12px}
 .chip{display:flex;align-items:baseline;gap:10px;padding:8px 16px;background:var(--panel);border:2px solid #e8e2d022}
@@ -56,7 +60,7 @@ canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);image-r
 .touch.portrait .primary{width:100%;height:76px}
 .touch.portrait .sec{width:100%;display:grid;grid-template-columns:1fr 1fr}
 .touch.portrait .s2{width:auto;height:60px}
-.touch.portrait .logo{font-size:52px!important}
+.touch.portrait .logo{font-size:76px!important}
 .mbr{display:none} .touch.portrait .mbr{display:inline}
 .settings{display:flex;flex-direction:column;gap:10px;width:min(360px,90vw)}
 .settings .row{justify-content:space-between;background:var(--panel);border:2px solid #e8e2d022;padding:10px 14px;font-size:12px}
@@ -127,6 +131,7 @@ body:not(.touch) #wrap{cursor:crosshair}
     <div id="kills">0 KILLS</div><div id="goldh">◆ 0</div>
     <div id="bossbar"><div class="bn" id="bossname">THE GRAVEKEEPER</div><div class="bb"><div id="bossfill"></div></div></div>
     <button id="dashBtn" aria-label="Dash">DASH</button>
+    <button id="pauseBtn" aria-label="Pause"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/></svg></button>
   </div>
   <div id="banner"></div>
   <div id="overlay" class="show"></div>
@@ -198,13 +203,18 @@ function applyAudioSettings(){ if(!ac) return; const S=meta.settings||{}; sfxBus
 /* ---------- procedural chiptune: D minor. Stage loop (96 bpm), boss loop (132 bpm, drums), Blood Moon transposes down ---------- */
 const mtof=m=>440*Math.pow(2,(m-69)/12);
 const MUS={next:0,step:0};
-const PROG=[[38,[50,53,57]],[34,[46,50,53]],[41,[53,57,60]],[33,[45,49,52]]]; // Dm  Bb  F  A
-function mnote(m,t,dur,type,vol,slide){
+/* E Phrygian / harmonic minor: Em - F - C - B. The F (flat 2nd) and the B major (D#) give it the dread. */
+const PROG=[[40,[52,55,59]],[41,[53,57,60]],[36,[48,52,55]],[35,[47,51,54]]];
+// melody: a falling b2 motif on bars 1 and 3 (E F E D B C B), answered by chord tones
+const MOTIF={0:64,3:65,6:64,8:62,10:59,12:60,14:59};
+function mnote(m,t,dur,type,vol,slide,lp){
   const o=ac.createOscillator(), g=ac.createGain(); o.type=type; o.frequency.setValueAtTime(mtof(m),t);
   if(slide) o.frequency.exponentialRampToValueAtTime(mtof(m)*slide,t+dur);
-  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-  o.connect(g).connect(musBus); o.start(t); o.stop(t+dur+.02);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+.008); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  if(lp){ const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp; o.connect(f).connect(g); } else o.connect(g);
+  g.connect(musBus); o.start(t); o.stop(t+dur+.02);
 }
+function kick(t,v){ mnote(40,t,.16,'sine',v||.16,.25); }
 function mnoise(t,dur,vol,hp){
   const src=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain(); src.buffer=noiseBuf; f.type='highpass'; f.frequency.value=hp;
   g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur); src.connect(f).connect(g).connect(musBus); src.start(t); src.stop(t+dur+.02);
@@ -213,23 +223,39 @@ function musicTick(){
   if(!ac || !musBus || ac.state!=='running') return;
   const playing=state==='play'||state==='cards', title=state==='title';
   if(!playing && !title){ MUS.next=0; return; }
-  const boss=playing && !!curBoss, bpm=boss?132:title?80:96, sp=60/bpm/4, now=ac.currentTime;
+  const boss=playing && !!curBoss, bpm=boss?168:title?76:140, sp=60/bpm/4, now=ac.currentTime;
   if(MUS.next<now) MUS.next=now+.05;
-  const tr=playing && wave>20?-2:0, lullQuiet=playing && lull>0;
+  const tr=playing && wave>20?-1:0, calm=playing && lull>0;
   while(MUS.next<now+.15){
-    const t=MUS.next, i=MUS.step%16, bar=Math.floor(MUS.step/16)%4, [root,ch]=PROG[bar];
-    if(boss){
-      if(i%2===0) mnote(root+tr+(i%4===2?12:0),t,.16,'sawtooth',.045);
-      if(i%4===0) mnote(36,t,.18,'sine',.14,.35);
-      if(i===4||i===12) mnoise(t,.12,.09,1500);
-      if(i%2===1) mnoise(t,.03,.025,6000);
-      mnote(ch[i%3]+tr+12+(i>=8?12:0),t,.09,'square',.018);
+    const t=MUS.next, i=MUS.step%16, bar=Math.floor(MUS.step/16)%4, [root,ch]=PROG[bar], r=root+tr;
+    if(title){
+      // slow dirge: low pedal, organ-ish fifths, one tolling bell per bar
+      if(i===0||i===8) mnote(r,t,.9,'triangle',.08,0,500);
+      if(i===0){ mnote(ch[0]+tr,t,1.8,'square',.012,0,700); mnote(ch[2]+tr,t,1.8,'square',.01,0,700); }
+      if(i===0 && bar%2===0) mnote(ch[0]+tr+24,t,2.2,'sine',.03);
+    } else if(calm){
+      // lull: drums drop out, the pad and a slow pulse remain
+      if(i%4===0) mnote(r,t,.25,'sawtooth',.03,0,400);
+      if(i===0){ mnote(ch[0]+tr+12,t,1.6,'triangle',.03); mnote(ch[2]+tr+12,t,1.6,'triangle',.022); }
+    } else if(boss){
+      // boss: double-time kick, 16th saw bass with octave stabs, tritone arp, offbeat stabs
+      if(i%2===0) kick(t,.15);
+      if(i===4||i===12) mnoise(t,.14,.1,1400);
+      mnoise(t,.025,i%2?.03:.015,7000);
+      mnote(r+(i%4===2?12:0),t,.08,'sawtooth',.05,0,900);
+      mnote([ch[0],ch[1],ch[2],ch[0]+6][i%4]+tr+12,t,.07,'square',.016,0,2600);
+      if(i%4===2) { mnote(ch[1]+tr+12,t,.1,'square',.018,0,1800); mnote(ch[2]+tr+12,t,.1,'square',.016,0,1800); }
+      if(i===0 && bar%2===0) mnote(ch[0]+tr+24,t,.5,'sawtooth',.02,0,2200);
     } else {
-      if([0,3,6,8,11,14].includes(i)) mnote(root+tr+(i===8?7:0),t,title?.5:.3,'triangle',title?.07:.09);
-      if(!title && !lullQuiet && i%2===0) mnote(ch[(i/2)%3]+tr+12,t,.14,'square',.016);
-      if((bar===0||bar===2) && i===0) mnote(ch[2]+tr+24,t,1.6,'sine',.035);
-      if(!title && i===10 && bar===3) mnote(ch[1]+tr+24,t,1.2,'sine',.025);
-      if(!title && !lullQuiet && (i===4||i===12)) mnoise(t,.05,.02,4000);
+      // waves: driving 16th-note bass pedal, four-on-the-floor kick, snare on 2 and 4, dark arp + motif
+      if(i%4===0) kick(t);
+      if(i===4||i===12) mnoise(t,.12,.08,1500);
+      if(i%2===1) mnoise(t,.02,.02,7000);
+      mnote(r+(i%4===3?12:0),t,.09,'sawtooth',.045,0,700);
+      mnote([ch[0],ch[1],ch[2],ch[1]][i%4]+tr+12,t,.08,'square',.012,0,2200);
+      if(i===0) mnote(ch[0]+tr+12,t,1.6,'triangle',.022);
+      if(bar%2===0 && MOTIF[i]) mnote(MOTIF[i]+tr,t,.22,'square',.022,0,2400);
+      else if(bar%2===1 && (i===0||i===6||i===10)) mnote(ch[2-(i%3)]+tr+12,t,.2,'square',.016,0,2000);
     }
     MUS.next+=sp; MUS.step++;
   }
@@ -332,7 +358,7 @@ function showShop(back){
       <div class="pips">${Array.from({length:it.max},(_,j)=>`<i class="${j<r?'on':''}"></i>`).join('')}</div>
       <div class="td">${r?it.desc(r):'Not bought'}${maxed?'':`<br><span class="nx">Next: ${it.desc(r+1)}</span>`}</div>
       <button class="btn sm buy" data-i="${i}" ${maxed||meta.gold<c?'disabled':''}>${maxed?'MAX':`BUY ${c} ◆`}</button></div>`; }).join('');
-  ov.innerHTML=`<h2>THE OSSUARY · PERMANENT UPGRADES</h2><div class="gold">◆ ${meta.gold} gold</div>
+  ov.innerHTML=`<h2>SHOP · PERMANENT UPGRADES</h2><div class="gold">◆ ${meta.gold} gold</div>
     <div class="shop">${tiles}</div>
     <div class="row"><button class="btn" id="sback">BACK</button><button class="btn sm" id="refund" ${meta.spent?'':'disabled'}>REFUND ALL (${meta.spent} ◆)</button></div>`;
   ov.classList.add('show');
@@ -441,6 +467,7 @@ addEventListener('pointermove',e=>{
 });
 const endJoy=e=>{ if(e.pointerId===joy.id) resetJoy(); };
 addEventListener('pointerup',endJoy); addEventListener('pointercancel',endJoy);
+$('pauseBtn').addEventListener('pointerdown',e=>{ e.stopPropagation(); e.preventDefault(); if(state==='play') togglePause(); });
 $('dashBtn').addEventListener('pointerdown',e=>{ e.stopPropagation(); e.preventDefault(); initAudio(); tryDash(); });
 
 function tryDash(){
@@ -471,14 +498,14 @@ function showTitle(){
       </div></div>
     <div class="tmain">
       <div class="ttop">
-        <h1 class="logo">BULLET<br class="mbr"> HEAVEN</h1>
+        <h1 class="logo">Catacomb<br class="mbr"> Raider</h1>
         <p class="sub">THE ENDLESS GRAVEYARD</p>
         <div class="chips"><div class="chip"><span>BEST</span><b>WAVE ${meta.best||'—'}</b></div><div class="chip"><span>GOLD</span><b class="g">◆ ${meta.gold}</b></div></div>
       </div>
       <div class="tact">
         <button class="primary" id="go">START RUN</button>
         <div class="sec">
-          <button class="s2" id="shop"><span>OSSUARY</span><small class="${ready?'g':''}">${ready?`${ready} upgrade${ready===1?'':'s'} ready`:'Permanent upgrades'}</small></button>
+          <button class="s2" id="shop"><span>SHOP</span><small class="${ready?'g':''}">${ready?`${ready} upgrade${ready===1?'':'s'} ready`:'Permanent upgrades'}</small></button>
           <button class="s2" id="achv"><span>ACHIEVEMENTS</span><small>${achDone} of ${ACH.length}</small></button>
         </div>
       </div>
@@ -505,9 +532,14 @@ function showSettings(back){
   ov.classList.add('show'); bindSettings(()=>showSettings(back)); $('sback').onclick=back;
 }
 function drawPause(){
-  ov.innerHTML=`<h2>PAUSED</h2><button class="btn" id="res">RESUME</button>${settingsRow()}<button class="btn sm" id="quit">ABANDON RUN</button>`;
-  ov.classList.add('show'); $('res').onclick=togglePause; bindSettings(drawPause); $('quit').onclick=()=>{ P.revives=0; P.hp=0; state='play'; gameOver(); };
+  ov.innerHTML=`<h2>PAUSED</h2><div class="stats">Wave ${wave} · ${kills} kills · <span class="g">◆ ${Math.floor(runGold)}</span> found</div>
+  <div class="pmenu"><button class="btn" id="res">RESUME</button>${settingsRow()}
+  <button class="btn sm" id="endrun">END RUN · SEE RESULTS</button><button class="btn sm" id="quit">QUIT TO MENU</button></div>
+  <p>Ending or quitting still banks your gold and best wave.</p>`;
+  ov.classList.add('show'); $('res').onclick=togglePause; bindSettings(drawPause);
+  $('endrun').onclick=()=>endRun(false); $('quit').onclick=()=>endRun(true);
 }
+function endRun(toTitle){ P.revives=0; P.hp=0; state='play'; gameOver(); if(toTitle) showTitle(); }
 function togglePause(){
   if(state==='play'){
     state='paused'; resetJoy(); drawPause();
@@ -565,7 +597,14 @@ function rollCards(bonus){
     out[ready.length?1+(Math.random()*2|0):Math.random()*Math.min(3,out.length+1)|0]={cls:'legendary',icon:R.icon,name:R.name,lv:`Legendary relic · ${l===0?'New':`Lv ${l} → ${l+1}`}`,
       desc:l===0?R.desc0:R.descUp,tag:'RELIC',apply:()=>relics[rk]++};
   }
-  while(out.length<3) out.push({cls:'common',icon:'✚',name:'Marrow Broth',lv:'Consumable',desc:'Heal 30 HP',tag:'',apply:()=>{ P.hp=Math.min(P.maxHp,P.hp+30); }});
+  // fully maxed build: fill with distinct consumables, never three copies of the same card
+  const g1=10+wave*2, g2=30+wave*4;
+  const FILL=[
+    {cls:'common',icon:'✚',name:'Marrow Broth',lv:'Consumable',desc:'Heal 30 HP',tag:'',apply:()=>{ P.hp=Math.min(P.maxHp,P.hp+30); }},
+    {cls:'rare',icon:'◆',name:'Grave Cache',lv:'Consumable',desc:`+${g1} gold for the shop`,tag:'',apply:()=>{ runGold+=g1; sfx.coin(); }},
+    {cls:'epic',icon:'☩',name:'Blood Pact',lv:'Risky',desc:`+${g2} gold, but -15 max HP for the rest of the run`,tag:'',apply:()=>{ runGold+=g2; P.maxHp=Math.max(20,P.maxHp-15); P.hp=Math.min(P.hp,P.maxHp); sfx.coin(); }}
+  ];
+  for(const f of FILL){ if(out.length>=3) break; out.push(f); }
   return out;
 }
 let keepCards=false;
@@ -660,12 +699,15 @@ function waveDef(w){
   const b=WAVES[19], boss=w%5===0;
   return {rate:boss?6:10,mix:b.mix,elites:boss?[]:[[12,'brute'],[26,['ghoul','runner','caster','splitter'][w%4]],[38,'brute']],rings:[8,24,40]};
 }
-const bloodMoon=()=>wave>20?Math.pow(1.08,wave-20):1;
+// Blood Moon (21+): builds max out around wave 20-25, so enemies must outscale the player on purpose.
+const bloodMoon=()=>wave>20?Math.pow(1.15,wave-20):1;          // enemy HP  (x2 by 25, x4 by 30, x16 by 40)
+const bloodDmg=()=>wave>20?Math.pow(1.10,wave-20):1;           // all damage you take (x1.6 by 25, x2.6 by 30)
+const bloodSpd=()=>wave>20?Math.min(1.4,1+.02*(wave-20)):1;   // enemy speed, capped at +40%
 function makeEnemy(t,x,y,elite){
   const T=TYPES[t], bm=bloodMoon(), hp=T.hp*(1+.22*(wave-1))*bm;
-  const e={t,x,y,hp,max:hp,spd:Math.min(T.cap,(34+wave*1.6)*T.spd)*rnd(.9,1.1),r:T.r,dmg:Math.round(T.dmg*bm),xp:T.xp,kb:T.kb,
+  const e={t,x,y,hp,max:hp,spd:Math.min(T.cap,(34+wave*1.6)*T.spd)*bloodSpd()*rnd(.9,1.1),r:T.r,dmg:T.dmg,xp:T.xp,kb:T.kb,
     flash:0,kx:0,ky:0,dead:false,ph:Math.random()*6,cool:rnd(1.5,3),dir:Math.random()<.5?-1:1};
-  if(elite){ e.elite=true; e.hp=e.max=hp*10; e.r=T.r*2; e.dmg=Math.round(T.dmg*bm*1.5); e.kb=T.kb*.3; e.spd*=.85; e.xp=10; }
+  if(elite){ e.elite=true; e.hp=e.max=hp*10; e.r=T.r*2; e.dmg=Math.round(T.dmg*1.5); e.kb=T.kb*.3; e.spd*=.85; e.xp=10; }
   enemies.push(e); return e;
 }
 function spawnEnemy(){
@@ -844,7 +886,7 @@ function breakProp(pr){
   else for(let k=0;k<3;k++) gems.push({x:pr.x+rnd(-5,5),y:pr.y+rnd(-5,5),v:wave>=6?3:1,pull:false});
 }
 function hurt(n){
-  P.hp-=Math.max(1,n-st.armor); P.inv=.5; P.flash=.15; shake=3; sfx.hurt();
+  P.hp-=Math.max(1,Math.round(n*bloodDmg())-st.armor); P.inv=.5; P.flash=.15; shake=3; sfx.hurt();
   if(relics.veil){ P.veil=1+.5*relics.veil; P.vtx=P.x; P.vty=P.y; }
   if(P.hp<=0 && P.revives>0){ P.revives--; P.hp=P.maxHp*.5; P.inv=2; shake=8; banner('RISEN AGAIN',1800); sfx.fall();
     for(const e of enemies){ if(e.boss) continue; const dx=e.x-P.x, dy=e.y-P.y, d=Math.hypot(dx,dy)||1; if(d<90){ e.kx+=dx/d*300; e.ky+=dy/d*300; } } return false; }
